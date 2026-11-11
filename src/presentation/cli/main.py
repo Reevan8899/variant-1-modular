@@ -8,6 +8,7 @@ from pathlib import Path
 from src.application.services.note_service import NoteService
 from src.domain.entities.note import Note
 from src.domain.exceptions.domain_errors import DomainError
+from src.infrastructure.persistence.json_note_repository import JSONNoteRepository
 from src.infrastructure.persistence.sqlite_note_repository import SQLiteNoteRepository
 
 
@@ -53,8 +54,13 @@ def print_notes(notes: list[Note]) -> None:
 def main(argv: list[str] | None = None) -> int:
     try:
         args = make_parser().parse_args(argv)
-        path = args.db or Path(os.environ.get("NOTES_FILE", "notes.sqlite3"))
-        service = NoteService(SQLiteNoteRepository(path))
+        storage = os.environ.get("STORAGE", "sqlite")
+        repositories = {"sqlite": (SQLiteNoteRepository, "notes.sqlite3"), "json": (JSONNoteRepository, "notes.json")}
+        if storage not in repositories:
+            raise DomainError("Укажите STORAGE=sqlite или STORAGE=json.")
+        repository, default_path = repositories[storage]
+        path = args.db or Path(os.environ.get("NOTES_FILE", default_path))
+        service = NoteService(repository(path))
         match args.command:
             case "add":
                 note = service.add_note(args.title, args.body, args.tags)
