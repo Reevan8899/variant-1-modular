@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from src.application.services.note_service import NoteService
+from src.application.use_cases.export_notes import export_to_csv
 from src.domain.entities.note import Note
 from src.domain.exceptions.domain_errors import DomainError
 from src.infrastructure.persistence.sqlite_note_repository import SQLiteNoteRepository
@@ -37,6 +38,8 @@ def make_parser() -> NoteParser:
     tags.add_argument("--tag", dest="tags", action="append")
     tags.add_argument("--clear-tags", dest="tags", action="store_const", const=[])
     commands.add_parser("delete", help="Удалить заметку").add_argument("id")
+    export = commands.add_parser("export", help="Выгрузить CSV")
+    export.add_argument("--output", type=Path, required=True)
     return parser
 
 
@@ -71,6 +74,14 @@ def main(argv: list[str] | None = None) -> int:
             case "delete":
                 service.delete_note(args.id)
                 print(f"Заметка удалена. ID: {args.id}")
+            case "export":
+                notes = service.list_notes()
+                try:
+                    with args.output.open("x", encoding="utf-8", newline="") as output:
+                        export_to_csv(notes, output)
+                except OSError as error:
+                    raise DomainError("Не удалось создать CSV. Укажите доступный путь к новому файлу.") from error
+                print(f"Выгружено заметок: {len(notes)}")
     except DomainError as error:
         print(f"Ошибка: {error}", file=sys.stderr)
         return 2
