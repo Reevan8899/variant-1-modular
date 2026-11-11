@@ -32,6 +32,9 @@ def main() -> int:
         if len(path.parts) < 3:
             continue
         layer = path.parts[1]
+        if layer not in FORBIDDEN:
+            problems.append(f"{path.as_posix()}: неизвестный слой {layer}")
+            continue
         package = ".".join(path.parent.parts)
         tree = ast.parse(file.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

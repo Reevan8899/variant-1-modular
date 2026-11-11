@@ -5,6 +5,11 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        storage: [sqlite, json]
+    env:
+      STORAGE: ${{ matrix.storage }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

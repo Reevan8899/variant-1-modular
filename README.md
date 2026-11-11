@@ -22,9 +22,16 @@ python -m src.presentation.cli.main delete ID
 
 Укажите фактический ID из списка. При редактировании `--tag` заменяет набор тегов, `--clear-tags` очищает его. Удаление по указанному ID выполняется сразу.
 
+## Выбор хранилища
+
+Значение `STORAGE=sqlite` выбирает SQLite, а `STORAGE=json` выбирает JSON. В PowerShell для текущей сессии выполните `$env:STORAGE = 'json'`. У адаптеров отдельные файлы по умолчанию, `notes.sqlite3` и `notes.json`. Установка зависимостей из `requirements.txt` включает поддержку обоих адаптеров.
+
 ## Проверка
 
 ```sh
 python -m pip install -r requirements.txt
 python -m pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+python scripts/check_layers.py
 ```
+
+CI запускает одинаковые тесты в двух режимах хранения.
