@@ -20,15 +20,17 @@ flowchart LR
 ## C4. Компоненты прикладного слоя
 
 ```mermaid
-flowchart LR
-    UI["CLI<br/>[Component: presentation]"]
-    subgraph App["Прикладной слой контейнера Python"]
-        N["NoteService<br/>[Component: application]<br/>Координирует операции"]
-        Q["Поиск заметок<br/>[Component: use_cases]<br/>Фильтрует по тексту и тегу"]
+flowchart TB
+    subgraph Python["Контейнер менеджера заметок · Python"]
+        UI["CLI<br/>[Component: presentation]"]
+        subgraph App["Прикладной слой"]
+            N["NoteService<br/>[Component: application]<br/>Координирует операции"]
+            Q["Поиск заметок<br/>[Component: use_cases]<br/>Фильтрует по тексту и тегу"]
+        end
+        D["Note и Tag<br/>[Component: domain]<br/>Данные и правила"]
+        P["NoteRepository<br/>[Interface: domain]<br/>Контракт хранения"]
+        S["SQLiteNoteRepository / JSONNoteRepository<br/>[Components: infrastructure]"]
     end
-    D["Note и Tag<br/>[Component: domain]<br/>Данные и правила"]
-    P["NoteRepository<br/>[Interface: domain]<br/>Контракт хранения"]
-    S["SQLiteNoteRepository / JSONNoteRepository<br/>[Components: infrastructure]"]
     UI -->|"Вызывает методы"| N
     N -->|"Делегирует запросы"| Q
     N -->|"Создаёт и валидирует"| D
